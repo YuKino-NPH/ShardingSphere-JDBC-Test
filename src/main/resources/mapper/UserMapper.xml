@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.shardingmybatis.mapper.UserEntityMapper">
+    <insert id="saveBatch">
+        INSERT INTO `user_entity_sharding`(`ID`,`username`,`order_number`,`phone`,`crt_time`,`user_extend_id`) VALUES
+        <foreach collection="list" separator="," item="item">
+            (#{item.id},#{item.username},#{item.orderNumber},#{item.phone},#{item.crtTime},#{item.userExtendId})
+        </foreach>
+    </insert>
+    <select id="selectByOrderNumberJoinExtend" resultType="com.example.shardingmybatis.entity.UserEntity">
+        SELECT ue.*
+        from `user_entity_sharding` ue
+                 left join `user_extend_sharding` ued on ue.user_extend_id = ued.id
+        where ue.order_number = #{orderNumber}
+    </select>
+    <select id="selectByCrtTimeLimit" parameterType="date" resultType="com.example.shardingmybatis.entity.UserEntity">
+        SELECT ue.*
+        from `user_entity_sharding` ue
+        where ue.crt_time > '2023-10-02'
+        order by ID limit 500
+    </select>
+    <select id="selectByCrtTimeJoinLimit" parameterType="date"
+            resultType="com.example.shardingmybatis.entity.UserEntity">
+        SELECT ue.*
+        from `user_entity_sharding` ue
+                 left join `user_extend_sharding` ued on ue.user_extend_id = ued.id
+        where ue.crt_time > #{crtTime}
+        order by ID limit 500
+    </select>
+    <select id="selectByCrtTimeAndPhoneJoinLimit" resultType="com.example.shardingmybatis.entity.UserEntity">
+        SELECT ue.*
+        from `user_entity_sharding` ue
+                 left join `user_extend_sharding` ued on ue.user_extend_id = ued.id
+        where ue.crt_time > #{crtTime}
+          and ue.phone > #{phone}
+        order by ID limit 500
+    </select>
+
+    <select id="selectByCrtTimeLikePhone" resultType="com.example.shardingmybatis.entity.UserEntity">
+        SELECT ue.*
+        from `user_entity_sharding` ue
+        where ue.crt_time > #{crtTime}
+          and phone like #{phone}
+        order by ID limit 500
+    </select>
+    <select id="selectByCrtTime" resultType="com.example.shardingmybatis.entity.UserEntity">
+        SELECT ue.id,ue.crt_time,ue.order_number,ue.phone,ue.user_extend_id,ue.username from `user_entity_sharding` ue
+        where ue.crt_time > #{crtTime}
+        and ue.order_number=#{orderNumber}
+        order by ID limit 1
+    </select>
+</mapper>

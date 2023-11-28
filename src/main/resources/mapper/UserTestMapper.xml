@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.shardingmybatis.mapper.UserEntityTestMapper">
+    <insert id="saveBatch">
+        INSERT INTO `user_entity`(`ID`,`username`,`order_number`,`phone`,`crt_time`,`user_extend_id`) VALUES
+        <foreach collection="list" separator="," item="item">
+            (#{item.id},#{item.username},#{item.orderNumber},#{item.phone},#{item.crtTime},#{item.userExtendId})
+        </foreach>
+    </insert>
+    <select id="selectByOrderNumberJoinExtend" resultType="com.example.shardingmybatis.entity.UserEntityTest">
+        SELECT ue.*
+        from `user_entity` ue
+                 left join `user_extend` ued on ue.user_extend_id = ued.id
+        where ue.order_number = #{orderNumber}
+    </select>
+    <select id="selectByCrtTimeLimit" parameterType="date"
+            resultType="com.example.shardingmybatis.entity.UserEntityTest">
+        SELECT ue.*
+        from `user_entity` ue
+        where ue.crt_time > #{crtTime}
+        order by ID limit 500
+    </select>
+    <select id="selectByCrtTimeJoinLimit" parameterType="date"
+            resultType="com.example.shardingmybatis.entity.UserEntityTest">
+        SELECT ue.*
+        from `user_entity` ue
+                 left join `user_extend` ued on ue.user_extend_id = ued.id
+        where ue.crt_time > #{crtTime}
+        order by ID limit 500
+    </select>
+    <select id="selectByCrtTimeAndPhoneJoinLimit" resultType="com.example.shardingmybatis.entity.UserEntityTest">
+        SELECT ue.*
+        from `user_entity` ue
+                 left join `user_extend` ued on ue.user_extend_id = ued.id
+        where ue.crt_time > #{crtTime}
+          and ue.phone > #{phone}
+        order by ID limit 500
+    </select>
+    <select id="selectByCrtTimeLikePhone"
+            resultType="com.example.shardingmybatis.entity.UserEntityTest">
+        SELECT ue.*
+        from `user_entity` ue
+        where ue.crt_time > #{crtTime}
+        and ue.phone like #{phone}
+        order by ID limit 500
+    </select>
+</mapper>

@@ -1,0 +1,55 @@
+server:
+  port: 10100
+
+mybatis:
+  type-aliases-package: com.example.shardingmybatis.entity  #  定义所有操作类的别名所在包
+
+spring: #springboot的配置
+#  datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    druid:
+#      username: root
+#      password: YuKino520@qq.com
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+#      url: jdbc:mysql://101.42.151.41:3306/sharding_test?characterEncoding=UTF-8&serverTimezone=UTC
+  shardingsphere:
+    datasource:
+      names: sharding-test
+      sharding-test:
+        type: com.alibaba.druid.pool.DruidDataSource
+        username: root
+        password: YuKino520@qq.com
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://101.42.151.41:3306/sharding_test?characterEncoding=UTF-8&serverTimezone=UTC
+    rules:
+      sharding:
+        tables:
+          user_entity_sharding:
+            actual-data-nodes: sharding-test.user_entity_20230$->{[4,7]},sharding-test.user_entity_2023$->{[10]}
+            table-strategy:
+              complex:
+                sharding-algorithm-name: myComplexKeysShardingAlgorithm
+                sharding-columns: crt_time,order_number
+#            key-generate-strategy:
+#              column: id
+#              key-generator-name: myComplexKeysShardingAlgorithm
+          user_extend_sharding:
+            actual-data-nodes: sharding-test.user_extend_20230$->{[4,7]},sharding-test.user_extend_2023$->{[10]}
+            table-strategy:
+              complex:
+                sharding-algorithm-name: myComplexKeysShardingAlgorithm
+                sharding-columns: crt_time,order_number
+#            key-generate-strategy:
+#              key-generator-name: myComplexKeysShardingAlgorithm
+#              column: id
+    #        default-database-strategy:
+#          hint:
+#            sharding-algorithm-name: myDefaultDataSourceShardingAlgorithm
+        binding-tables:
+          - user_entity_sharding,user_extend_sharding
+    props:
+      sql-show: true
+# mybatis-plus相关配置
+mybatis-plus:
+  # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
+  mapper-locations: classpath:mapper/*.xml
